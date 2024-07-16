@@ -376,7 +376,7 @@ class GimmeAWSCreds(object):
                 is_regexp = len(role_name) > 2 and role_name[0] == role_name[-1] == '/'
                 pattern = re.compile(role_name[1:-1])
                 for aws_role in aws_roles:
-                    if aws_role.role == role_name or (is_regexp and pattern.search(aws_role.role)):
+                    if aws_role.role == role_name or (is_regexp and (pattern.search(aws_role.friendly_account_name) or pattern.search(aws_role.role))):
                         ret.add(aws_role.role)
 
             if ret:
@@ -585,6 +585,12 @@ class GimmeAWSCreds(object):
 
             if self.conf_dict.get('preferred_mfa_type'):
                 okta.set_preferred_mfa_type(self.conf_dict['preferred_mfa_type'])
+                
+            if self.conf_dict.get('authenticator_name'):
+                okta.set_authenticator_name(self.conf_dict['authenticator_name'])
+
+            if self.conf_dict.get('authenticator_id'):
+                okta.set_authenticator_id(self.conf_dict['authenticator_id'])
 
             if self.conf_dict.get('preferred_mfa_provider'):
                 okta.set_preferred_mfa_provider(self.conf_dict['preferred_mfa_provider'])

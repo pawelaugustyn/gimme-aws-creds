@@ -74,6 +74,8 @@ class OktaClassicClient(object):
         self._username = None
         self._password = None
         self._preferred_mfa_type = None
+        self._authenticator_name = None
+        self._authenticator_id = None
         self._preferred_mfa_provider = None
         self._duo_universal_factor = 'Duo Push'
         self._mfa_code = None
@@ -114,6 +116,12 @@ class OktaClassicClient(object):
 
     def set_preferred_mfa_type(self, preferred_mfa_type):
         self._preferred_mfa_type = preferred_mfa_type
+
+    def set_authenticator_name(self, authenticator_name):
+        self._authenticator_name = authenticator_name
+
+    def set_authenticator_id(self, authenticator_id):
+        self._authenticator_id = authenticator_id
 
     def set_preferred_mfa_provider(self, preferred_mfa_provider):
         self._preferred_mfa_provider = preferred_mfa_provider
@@ -854,6 +862,13 @@ class OktaClassicClient(object):
             factors.append(passcode)
         if self._preferred_mfa_type is not None:
             preferred_factors = list(filter(lambda item: item['factorType'] == self._preferred_mfa_type, factors))
+            if self._authenticator_id is not None:
+                preferred_factors = list(filter(lambda item: item['id'] == self._authenticator_id, factors))
+            elif self._preferred_mfa_type is not None:
+                preferred_factors = list(filter(lambda item: item['factorType'] == self._preferred_mfa_type, factors))
+                # if you have more than one webauthn registered
+                if self._authenticator_name is not None:
+                    preferred_factors=list(filter(lambda item: item['profile']['authenticatorName'] == self._authenticator_name, preferred_factors))
             # If the preferred factor isn't in the list of available factors, we'll let the user know before
             # prompting to select another.
             if not preferred_factors:
